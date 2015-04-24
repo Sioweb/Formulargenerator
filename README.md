@@ -2,6 +2,9 @@
 
 Rendering fast and dynamic a formular.
 
+- requires PHP 5.4
+- If you don't have PHP 5.4 just replace the new array syntax `['foo'=>'bar']` with `array('foo'=>'bar')` (***PHP 5.3 still needed!***)
+
 ##HowTo
 
 At first include and initialice the form class:
