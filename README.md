@@ -52,10 +52,15 @@ You can also insert an array with fieldsets and formular elements. This can be v
 
 	$FormData = [
   		'fieldset_one' => [
+			'legend'=>'First Fieldset',
     		'name' => ['template'=>'text','value'=>'Sascha Weidner','label'=>'Name','placeholder'=>'Insert here!'],
     		'lastname' => ['template'=>'text','label'=>'Lastname','placeholder'=>'Insert here!'],
-  		]
+  		],
 	];
+
+**Note:** Please have a look to 'legend'=>'First Fieldset', this entery will be print as label.
+
+**Note:** You can add checkboxes an radio buttons as array.
 
 Now inititialize the formular and you will get the same output as in the next examples.
 	

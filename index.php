@@ -5,10 +5,31 @@ error_reporting(E_ALL);
 // echo '<pre>'.print_r($_POST,1).'</pre>';
 
 $FormData = [
-  'eins' => [
-    'name' => ['template'=>'text','value'=>'Sascha Weidner','label'=>'Vorname','placeholder'=>'Hier eintragen!'],
-    'lastname' => ['template'=>'text','label'=>'Nachname','placeholder'=>'Hier eintragen!'],
-  ]
+  'first' => [
+    'legend' => 'First Fieldset',
+    'name' => ['template'=>'text','value'=>'Sascha Weidner','label'=>'Name','placeholder'=>'Please enter here!'],
+    'lastname' => ['template'=>'text','label'=>'Lastname','placeholder'=>'Please enter here!'],
+  ],
+  'second' => [
+    'legend' => 'Second Fieldset',
+    'checkbox' => [
+      ['template'=>'checkbox','value'=>1,'label'=>'Checkbox 1'],
+      ['template'=>'checkbox','value'=>2,'label'=>'Checkbox 2'],
+      ['template'=>'checkbox','value'=>3,'label'=>'Checkbox 3'],
+    ],
+  ],
+  'third' => [
+    'legend' => 'Third Fieldset',
+    'radio' => [
+      ['template'=>'radio','value'=>1,'label'=>'Radio 1'],
+      ['template'=>'radio','value'=>2,'label'=>'Radio 2'],
+      ['template'=>'radio','value'=>3,'label'=>'Radio 3'],
+    ],
+  ],
+  'fourth' => [
+    'legend' => 'Submit',
+    'submit' => ['template'=>'submit','value'=>'Submit'],
+  ],
 ];
 
 echo '<pre>'.print_r($FormData,1).'</pre>';
@@ -23,18 +44,18 @@ $Form = new Form($REX['ROOT'].'/templates','eins',true);
 $Form->fieldset('eins','Eins');
 
 /* Feld direkt mit Werten erzeugen */
-$Form->field('text',['name'=>'name','label'=>'Vorname','placeholder'=>'Hier eintragen!']);
+$Form->field('text',['name'=>'name','label'=>'Name','placeholder'=>'Please enter here!']);
 /*
   Feld nachträglich bearbeiten:
   * $Form->label = 'Feld 1';
-  * $Form->placeholder = 'Hier eintragen!';
+  * $Form->placeholder = 'Please enter here!';
 */
 
 /* Feld als Record anlegen */
 $Form->field('text');
 $Form->name = 'lastname';
-$Form->label = 'Nachname';
-$Form->placeholder = 'Hier eintragen!';
+$Form->label = 'Lastname';
+$Form->placeholder = 'Please enter here!';
 
 
 $Form->field('select');
@@ -48,7 +69,7 @@ $Form->options = [
 
 $Form->field('textarea');
 $Form->name = 'message';
-$Form->label = 'Mitteilung';
+$Form->label = 'Message';
 
 
 $Form->fieldset('zwei','Zwei');
@@ -94,7 +115,7 @@ $Form->label = 'Checkbox 3';
 $Form->value = 3;
 
 $Form->fieldset('vier','Vier');
-$Form->field('submit',['value'=>'Senden']);
+$Form->field('submit',['value'=>'Submit']);
 
 ?><!DOCTYPE html>
 <html lang="en">
@@ -112,6 +133,7 @@ $Form->field('submit',['value'=>'Senden']);
       $Form1->generate(true);
     ?>
   </form>
+  <br><br>
   <h2>Form 2</h2>
   <form action="index.php" method="post">
     <?php $Form->generate(true);?>

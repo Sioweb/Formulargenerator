@@ -125,22 +125,33 @@ class Form implements iForm {
     $this->save();
     foreach($fields as $type => $fieldsets) {
       $this->fieldset = $type;
-      foreach($fieldsets as $field) {
-        if(!is_array($field)) {
-          $this->field = $field;
-          $this->output[$type][] = $this->loadTemplate($this->field->template);
+      foreach($fieldsets as $fkey => $field) {
+        if($fkey == 'legend') {
+          $this->legend[$type] = $fieldsets['legend'];
         } else {
-          $this->field = (object)$field;
-          $this->std()->format();
-          if(empty($field[0]))
+          if(!is_array($field)) {
+            $this->field = $field;
             $this->output[$type][] = $this->loadTemplate($this->field->template);
-          else foreach($field as $subfield) {
-            $this->field = $subfield;
-            $this->std()->format();
-            $this->output[$type][] = $this->loadTemplate($this->field->template);
+          } else {
+            if(empty($field[0])) {
+              $this->field = (object)$field;
+              $this->field->name = $key;
+              $this->std()->format();
+              $this->output[$type][] = $this->loadTemplate($this->field->template);
+            } else {
+              $arrSubfields = [];
+              foreach($field as $key => $subfield) {
+                $this->field = (object)$subfield;
+                $this->std()->format((object)$arrSubfields);
+                $this->field->name = $fkey;
+                $arrSubfields[$this->field->id] = 1;
+                $this->output[$type][] = $this->loadTemplate($this->field->template);
+              }
+            }
           }
         }
       }
+
       if($shout && !empty($this->output[$type])) {
         $this->output[$type] = $this->loadTemplate('fieldset');
       }
@@ -184,12 +195,14 @@ class Form implements iForm {
   /**
    * @brief Formatiert Attribute damit diese auch ohne Angaben valide ausgegeben werden können.
    */
-  private function format() {
+  private function format($arr = []) {
+
+    $arrContailer = !empty($arr)?$arr:$this->fields->{$this->fieldset};
     if(empty($this->field->name))
       $this->field->name = 'field_'.count($this->fields);
     if(empty($this->field->id)) {
       $this->field->id = $this->field->template.'_'.$this->field->name;
-      while(!empty($this->fields->{$this->fieldset}->{$this->field->id})) {
+      while(!empty($arrContailer->{$this->field->id})) {
         $arrID = explode('_',$this->field->id);
         $id = end($arrID);
         /* checkbox_checkbox / checkbox_checkbox_1 / checkbox_checkbox_2 / ... */
