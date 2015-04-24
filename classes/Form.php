@@ -135,7 +135,7 @@ class Form implements iForm {
           } else {
             if(empty($field[0])) {
               $this->field = (object)$field;
-              $this->field->name = $key;
+              $this->field->name = $fkey;
               $this->std()->format();
               $this->output[$type][] = $this->loadTemplate($this->field->template);
             } else {
@@ -196,7 +196,7 @@ class Form implements iForm {
    * @brief Formatiert Attribute damit diese auch ohne Angaben valide ausgegeben werden können.
    */
   private function format($arr = []) {
-
+    $this->setup($this->fields->{$this->fieldset});
     $arrContailer = !empty($arr)?$arr:$this->fields->{$this->fieldset};
     if(empty($this->field->name))
       $this->field->name = 'field_'.count($this->fields);
