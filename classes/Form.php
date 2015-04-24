@@ -126,9 +126,20 @@ class Form implements iForm {
     foreach($fields as $type => $fieldsets) {
       $this->fieldset = $type;
       foreach($fieldsets as $field) {
-        $this->field = (object)$field;
-        $this->std()->format();
-        $this->output[$type][] = $this->loadTemplate($this->field->template);
+        if(!is_array($field)) {
+          $this->field = $field;
+          $this->output[$type][] = $this->loadTemplate($this->field->template);
+        } else {
+          $this->field = (object)$field;
+          $this->std()->format();
+          if(empty($field[0]))
+            $this->output[$type][] = $this->loadTemplate($this->field->template);
+          else foreach($field as $subfield) {
+            $this->field = $subfield;
+            $this->std()->format();
+            $this->output[$type][] = $this->loadTemplate($this->field->template);
+          }
+        }
       }
       if($shout && !empty($this->output[$type])) {
         $this->output[$type] = $this->loadTemplate('fieldset');
