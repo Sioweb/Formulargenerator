@@ -114,25 +114,25 @@ All elements has default attributes and some has their own specific attributes. 
 
 ###Defaults
 
-- $Form->label
-- $Form->value	if $post is true in the first line, it can be overrided by POST-Values.
-- $Form->name every element needs a name, if $Form->multiple is set, it will add those tho the name `name[]`
-- $Form->placeholer
-- $Form->multiple is false by default
-- $Form->attribute can contain everything. This is useful for javascript attributes.
+- `$Form->label`
+- `$Form->value`	if $post is true in the first line, it can be overrided by POST-Values.
+- `$Form->name` every element needs a name, if $Form->multiple is set, it will add those tho the name `name[]`
+- `$Form->placeholer`
+- `$Form->multiple` is false by default
+- `$Form->attribute` can contain everything. This is useful for javascript attributes.
 
 ###Select
 
-- $Form->size
+- `$Form->size`
 
 ###Checkbox
 
-- Form->multiple is by default true. Just write `$Form->multiple = false;` if you wan't to undone this.
+- `Form->multiple` is by default true. Just write `$Form->multiple = false;` if you wan't to undone this.
 
 ###Textarea
 
-- $Form->cols by default 50
-- $Form->rows by default 10
+- `$Form->cols` by default 50
+- `$Form->rows` by default 10
 
 ##Futur releases
 
@@ -140,3 +140,5 @@ This project is increasing by it's requirements. If i need or maybe if you need,
 
 Thx  
 Sioweb
+
+[www.sioweb.de](http://www.sioweb.de) | [@Sioweb](http://twitter.com/Sioweb) | [Facebook](http://facebook.com/Sioweb) | [Xing](https://www.xing.com/profile/Sascha_Weidner5)
