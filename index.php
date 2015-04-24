@@ -1,9 +1,14 @@
 <?php
 
-error_reporting(E_ALL);
+include 'classes/Form.php';
 
-// echo '<pre>'.print_r($_POST,1).'</pre>';
+/* As JSON */
 
+$JSON = '{"first":{"legend":"First Fieldset","name":{"template":"text","value":"Sascha Weidner","label":"Name","placeholder":"Please enter here!"},"lastname":{"template":"text","label":"Lastname","placeholder":"Please enter here!"}},"second":{"legend":"Second Fieldset","checkbox":[{"template":"checkbox","value":1,"label":"Checkbox 1"},{"template":"checkbox","value":2,"label":"Checkbox 2"},{"template":"checkbox","value":3,"label":"Checkbox 3"}]},"third":{"legend":"Third Fieldset","radio":[{"template":"radio","value":1,"label":"Radio 1"},{"template":"radio","value":2,"label":"Radio 2"},{"template":"radio","value":3,"label":"Radio 3"}]},"fourth":{"legend":"Submit","submit":{"template":"submit","value":"Submit"}}}';
+$FormData = json_decode($JSON,1);
+
+
+/* As Array */
 $FormData = [
   'first' => [
     'legend' => 'First Fieldset',
@@ -32,26 +37,21 @@ $FormData = [
   ],
 ];
 
-echo '<pre>'.print_r($FormData,1).'</pre>';
 
-include 'classes/Form.php';
+/* On the fly */
+$Form = new Form(dirname(__FILE__).'/templates','first',true);
+$Form->fieldset('first','First Fieldset');
 
-$REX = [
-  'ROOT' => dirname(__FILE__),
-];
 
-$Form = new Form($REX['ROOT'].'/templates','eins',true);
-$Form->fieldset('eins','Eins');
-
-/* Feld direkt mit Werten erzeugen */
+/* Create field directly with params */
 $Form->field('text',['name'=>'name','label'=>'Name','placeholder'=>'Please enter here!']);
 /*
-  Feld nachträglich bearbeiten:
+  Edit field after initialisation:
   * $Form->label = 'Feld 1';
   * $Form->placeholder = 'Please enter here!';
 */
 
-/* Feld als Record anlegen */
+/* Generate field as record */
 $Form->field('text');
 $Form->name = 'lastname';
 $Form->label = 'Lastname';
@@ -60,10 +60,10 @@ $Form->placeholder = 'Please enter here!';
 
 $Form->field('select');
 $Form->name = 'salutation';
-$Form->label = 'Anrede';
+$Form->label = 'Salutation';
 $Form->options = [
-  'Frau' => 'Frau',
-  'Herr' => 'Herr',
+  'Mrs' => 'Mrs.',
+  'Mr' => 'Mr.',
 ];
 
 
@@ -72,7 +72,8 @@ $Form->name = 'message';
 $Form->label = 'Message';
 
 
-$Form->fieldset('zwei','Zwei');
+$Form->fieldset('second','Second Fieldset');
+
 
 $Form->field('hidden');
 $Form->name = 'radio';
@@ -93,7 +94,9 @@ $Form->name = 'radio';
 $Form->label = 'Radio 3';
 $Form->value = 3;
 
-$Form->fieldset('drei','Drei');
+
+$Form->fieldset('three','Third Fieldset');
+
 
 $Form->field('hidden');
 $Form->name = 'checkbox';
@@ -114,7 +117,10 @@ $Form->name = 'checkbox';
 $Form->label = 'Checkbox 3';
 $Form->value = 3;
 
-$Form->fieldset('vier','Vier');
+
+$Form->fieldset('fourth','Fourth Fieldset');
+
+
 $Form->field('submit',['value'=>'Submit']);
 
 ?><!DOCTYPE html>
@@ -126,14 +132,13 @@ $Form->field('submit',['value'=>'Submit']);
 </head>
 <body>
   <h2>Form 1</h2>
-
   <form action="index.php" method="post">
     <?php 
-      $Form1 = new Form($REX['ROOT'].'/templates','eins',true,$FormData);
+      $Form1 = new Form(dirname(__FILE__).'/templates','eins',true,$FormData);
       $Form1->generate(true);
     ?>
   </form>
-  <br><br>
+  <br><br><br><br>
   <h2>Form 2</h2>
   <form action="index.php" method="post">
     <?php $Form->generate(true);?>
