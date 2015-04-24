@@ -5,7 +5,6 @@ interface iForm {
   public function path($strPath);
   public function field($strType,$arrAttr = []);
   public function save();
-  public function generate($shout = false);
 }
 
 class Form implements iForm {
@@ -38,13 +37,24 @@ class Form implements iForm {
   ];
   
 
-  public function __construct($path = 'templates',$fieldset = 'std',$post = true) {
+  public function __construct($path = 'templates',$fieldset = 'std',$post = true,array $formdata = array()) {
     $this->path = $path;
     $this->fieldset = $fieldset;
     $this->postvalue = $post;
 
     $this->setup($this->fields);
     $this->setup($this->fields->$fieldset);
+
+    if(!empty($formdata))
+      $this->fields = (object)$formdata;
+  }
+
+  public function __call($func,$values) {
+    if($func == 'generate') {
+      if(empty($values[0]))
+        $values[0] = false;
+      return $this->generate($this->fields,$values[0]);
+    }
   }
 
   public function __set($var, $val) {
@@ -111,13 +121,14 @@ class Form implements iForm {
    * @param $shout Ist $shout gesetzt wird das Formular via echo ausgegeben, wobei alle Elemente mit dem Wert $shout getrennt werden. Ist $shout === true werden die Elemente einfach aneinander gereiht.
    * @return array Gibt ein Array zurück mit den generierten Elementen
    */
-  public function generate($shout = false) {
+  protected function generate($fields,$shout = false) {
     $this->save();
-    foreach($this->fields as $type => $fieldsets) {
+    foreach($fields as $type => $fieldsets) {
       $this->fieldset = $type;
       foreach($fieldsets as $field) {
-        $this->field = $field;
-        $this->output[$type][] = $this->loadTemplate($field->template);
+        $this->field = (object)$field;
+        $this->std()->format();
+        $this->output[$type][] = $this->loadTemplate($this->field->template);
       }
       if($shout && !empty($this->output[$type])) {
         $this->output[$type] = $this->loadTemplate('fieldset');

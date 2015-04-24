@@ -4,6 +4,15 @@ error_reporting(E_ALL);
 
 // echo '<pre>'.print_r($_POST,1).'</pre>';
 
+$FormData = [
+  'eins' => [
+    'name' => ['template'=>'text','value'=>'Sascha Weidner','label'=>'Vorname','placeholder'=>'Hier eintragen!'],
+    'lastname' => ['template'=>'text','label'=>'Nachname','placeholder'=>'Hier eintragen!'],
+  ]
+];
+
+echo '<pre>'.print_r($FormData,1).'</pre>';
+
 include 'classes/Form.php';
 
 $REX = [
@@ -95,6 +104,15 @@ $Form->field('submit',['value'=>'Senden']);
   <style>fieldset + fieldset {margin-top: 20px;}fieldset > div + div { margin-top: 10px;}label {width: 100px;display: inline-block;vertical-align: top;} [type=text],textarea,select {width: 400px;}</style>
 </head>
 <body>
+  <h2>Form 1</h2>
+
+  <form action="index.php" method="post">
+    <?php 
+      $Form1 = new Form($REX['ROOT'].'/templates','eins',true,$FormData);
+      $Form1->generate(true);
+    ?>
+  </form>
+  <h2>Form 2</h2>
   <form action="index.php" method="post">
     <?php $Form->generate(true);?>
   </form>
