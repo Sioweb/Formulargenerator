@@ -7,36 +7,53 @@ Rendering fast and dynamic a formular.
 At first include and initialice the form class:
 
 	include 'classes/Form.php';
-	$Form = new Form(string $TemplatePath, string $Fieldsetname, bool $post = true);
+	$Form = new Form(string $TemplatePath, string $Fieldsetname, bool $post = true,array $formdata = array());
 	
-Now you can load the formular elements in two ways:
+Now you can load the formular elements in to ways:
 
 	$Form->field('text',[
 		'name'=>'name',
-		'label'=>'Vorname',
-		'placeholder'=>'Hier eintragen!'
+		'label'=>'Name',
+		'placeholder'=>'Insert here!'
 	]);
 
 Case two:
 
 	$Form->field('text');
 	$Form->name = 'name';
-	$Form->label = 'Vorname';
-	$Form->placeholder = 'Hier eintragen!';
-	
+	$Form->label = 'Lastname';
+	$Form->placeholder = 'Insert here!';
+		
 Both cases can be combined, load the form elemend with the second param and replace later some of those element params like in case two.
 
 The Method to load new formular elements will save the element automatically and load the next. So every time you load a new, all params will be saved for the loaded element.
 
 	$Form->field('text');
 	$Form->name = 'name';
-	$Form->label = 'Vorname';
-	$Form->placeholder = 'Bitte Vorname eintragen';
+	$Form->label = 'Name';
+	$Form->placeholder = 'Please insert your name';
 	
 	$Form->field('text');
 	$Form->name = 'lastname';
-	$Form->label = 'Nachname';
-	$Form->placeholder = 'Bitte Nachname eintragen';
+	$Form->label = 'Lastname';
+	$Form->placeholder = 'Please insert your lastname';
+
+##Direct Input
+
+You can also insert an array with fieldsets and formular elements. This can be very useful if  you save the formular settigns as JSON in your database.
+
+	$FormData = [
+  		'fieldset_one' => [
+    		'name' => ['template'=>'text','value'=>'Sascha Weidner','label'=>'Name','placeholder'=>'Insert here!'],
+    		'lastname' => ['template'=>'text','label'=>'Lastname','placeholder'=>'Insert here!'],
+  		]
+	];
+
+Now inititialize the formular and you will get the same output as in the next examples.
+	
+	$Form = new Form('/to/your/templates','std',true,$FormData);
+	$Form->generate(true);
+
 
 ##Fieldsets
 
