@@ -29,11 +29,13 @@ class Form implements iForm {
    * Jedes Formular-Element / Template kann eigene Standard-Attribute besitzen.
    */
   private $stdAttr = [
-    'std'=>['label','value','id','name','placeholder','attribute'],
+    'std'=>['label','value','id','name','placeholder','attribute','required','maxlength','size','class','title','id','readonly','disabled','autocomplete','autofocus','form','width','height','list','pattern','step'],
+    'number'=>['min','max'],
     'select'=>['size'=>1,'active','multiple'],
     'radio'=>['active','multiple'],
     'checkbox'=>['active','multiple'=>1],
     'textarea'=>['cols'=>50,'rows'=>10],
+    'submit'=>['formaction','formenctype','formmethod','formnovalidate','formtarget']
   ];
   
 
