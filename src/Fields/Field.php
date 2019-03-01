@@ -50,7 +50,12 @@ class Field
 
     protected function updateValue()
     {
+        if(empty($_POST)) {
+            return;
+        }
+        
         $postValue = $this->Form->getFieldValues();
+        
         foreach($this->names as $key) {
             $postValue = $postValue[$key];
         }
