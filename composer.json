@@ -2,7 +2,6 @@
     "name": "sioweb/formgenerator",
     "description": "Use config json/array to build form",
     "type": "library",
-    "version": "0.1.1",
     "authors": [
         {
             "name": "Sascha Weidner",
