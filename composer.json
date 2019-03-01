@@ -1,0 +1,25 @@
+{
+    "name": "sioweb/formgenerator",
+    "description": "Use config json/array to build form",
+    "type": "library",
+    "version": "0.1.1",
+    "authors": [
+        {
+            "name": "Sascha Weidner",
+            "email": "support@sioweb.de"
+        }
+    ],
+    "keywords": [
+        "library",
+        "form",
+        "generator"
+    ],
+    "homepage": "https://github.com/sioweb/Formulargenerator",
+    "license": "GPL-3.0-only",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "Sioweb\\Lib\\Formgenerator\\": "./src/"
+        }
+    }
+}

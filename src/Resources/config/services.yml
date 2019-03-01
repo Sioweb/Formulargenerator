@@ -1,0 +1,3 @@
+services:
+    sioweb.formbuilder.form:
+        class: 'Sioweb\Lib\Formbuilder\Core\Form'
