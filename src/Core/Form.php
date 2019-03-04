@@ -20,11 +20,14 @@ class Form
 
     private $dataContainer = null;
 
-
     private $settings = [
+        'id' => '',
         'formname' => '',
-        'brackets' => ['[{','}]'],
+        'noFieldsets' => false,
+        'updateValues' => false,
+        'brackets' => ['[{', '}]'],
         'fieldname' => '%FIELDNAME%',
+        'defaultPalette' => 'default',
     ];
 
     private $postvalue = true;
@@ -36,8 +39,8 @@ class Form
     public function __construct($TemplateLoader = null, $DataContainer = null)
     {
         $this->TemplateLoader = $TemplateLoader;
-        if(!empty($DataContainer)) {
-            if($DataContainer instanceof FormInterface) {
+        if (!empty($DataContainer)) {
+            if ($DataContainer instanceof FormInterface) {
                 $this->dataContainer = $DataContainer;
             } else {
                 // throw execption
@@ -50,12 +53,17 @@ class Form
         $this->path = $path;
     }
 
+    public function getSettings()
+    {
+        return $this->settings;
+    }
+
     public function getFieldValues()
     {
-        if(!empty($_POST)) {
+        if (!empty($_POST)) {
             return array_replace_recursive($_POST, $this->fieldValues);
         }
-        
+
         return $this->fieldValues;
     }
 
@@ -70,7 +78,7 @@ class Form
             $formdata = $this->dataContainer->loadData();
         }
         $this->settings = array_merge($this->settings, array_diff_key($formdata['form'], ['palettes' => '', 'fields' => '']));
-        if(empty($this->settings['id'])) {
+        if (empty($this->settings['id'])) {
             $this->settings['id'] = md5(uniqid(microtime()));
         }
         $this->prepareFormData($formdata);
@@ -81,19 +89,20 @@ class Form
         if (strpos($String, $this->settings['brackets'][0]) === false) {
             return $String;
         }
+
+        if (empty($Data)) {
+            $Data = $this->variables;
+        }
         
         $Data = array_merge($this->settings, $Data);
         $brackets = $this->settings['brackets'];
-        array_walk($brackets, function(&$item) use ($brackets) {
-            $item = addcslashes($item, implode('', (array)$brackets));
+        array_walk($brackets, function (&$item) use ($brackets) {
+            $item = addcslashes($item, implode('', (array) $brackets));
         });
 
-        if(empty($Data)) {
-            $Data = $this->variables;
-        }
 
         foreach ($Data as $Variable => $Replacement) {
-            if(preg_match('|' . $brackets[0] . '[ ]+\${1}' . strtoupper($Variable) . '[ ]+' . $brackets[1] . '|i', $String)) {
+            if (preg_match('|' . $brackets[0] . '[ ]+\${1}' . strtoupper($Variable) . '[ ]+' . $brackets[1] . '|i', $String)) {
                 $String = preg_replace('|' . $brackets[0] . '[ ]+\${1}' . strtoupper($Variable) . '[ ]+' . $brackets[1] . '|i', $Replacement, $String);
             }
         }
@@ -117,7 +126,7 @@ class Form
         }
 
         $FieldsNamespace = '\\Sioweb\\Lib\\Formgenerator\\Fields\\';
-        if(!empty($this->settings['fieldnamespace'])) {
+        if (!empty($this->settings['fieldnamespace'])) {
             $FieldsNamespace = $this->settings['fieldnamespace'];
         }
         foreach ($formdata['form']['fields'] as $fieldId => &$field) {
@@ -125,17 +134,19 @@ class Form
                 if (empty($field['name'])) {
                     $field['name'] = $this->replaceVariables($this->settings['fieldname'], ['fieldname' => $fieldId]);
                 }
-                
+
                 preg_match_all('#([a-z]+)|\[([^\]]+)\]#', $field['name'], $matches);
                 $field['names'] = array_merge(array_filter($matches[1]), array_filter($matches[2]));
 
-                if($field['type'] === 'default') {
+                if ($field['type'] === 'default') {
                     $Classname = $FieldsNamespace . 'Text';
                 } else {
                     $Classname = $FieldsNamespace . ucfirst($field['type']);
                 }
+
                 $field = new $Classname($fieldId, $field, $this);
-                if(!empty($field->palette)) {
+
+                if (!empty($field->palette)) {
                     $this->triggerPalette = $field;
                 }
             }
@@ -204,19 +215,34 @@ class Form
      */
     public function generate($shout = false)
     {
-        $Palette = 'default';
+        $Palette = $this->settings['defaultPalette'];
         if (!empty($this->triggerPalette->value)) {
             $Palette = $this->triggerPalette->value;
         }
+
         $Palette = $this->palettes[$Palette];
-        foreach ($Palette->getFieldsets() as $fieldsetId => $fieldset) {
-            foreach ($fieldset->getFields() as $fieldName) {
+        $PaletteFieldsets = $Palette->getFieldsets();
+
+        foreach ($PaletteFieldsets as $fieldsetId => $fieldset) {
+            $Fields = $fieldset->getFields();
+            if (empty($Fields)) {
+                continue;
+            }
+
+            $skipFieldset = true;
+            foreach ($Fields as $fieldName) {
+                if (empty($this->fields[$fieldName]) || !empty($this->fields[$fieldName]->hideOnEdit)) {
+                    continue;
+                }
                 $this->field = null;
                 $this->field = $this->fields[$fieldName];
                 $this->output[$fieldsetId][] = $this->field->raw = $this->loadTemplate($this->field->type, $this->field);
                 $fieldset->updateField($this->field);
+                $skipFieldset = false;
             }
-            $this->output[$fieldsetId] = $this->field->raw = $this->loadTemplate('fieldset', $fieldset);
+            if (!$skipFieldset) {
+                $this->output[$fieldsetId] = $this->field->raw = $this->loadTemplate('fieldset', $fieldset);
+            }
         }
         $this->field = null;
         $this->fields = null;

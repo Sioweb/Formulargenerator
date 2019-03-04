@@ -2,29 +2,15 @@
 
 namespace Sioweb\Lib\Formgenerator\Fields;
 
+use Sioweb\Lib\Formgenerator\Attributes\Attributes;
 use Sioweb\Lib\Formgenerator\Core\Form;
 
 class Field
 {
 
-    private $form = null;
+    public $form = null;
 
     public $field = null;
-
-    /**
-     * @param private $strAttr
-     * Enthält Standard-Attribute damit keine Fehler ausgeworfen werden.
-     * Jedes Formular-Element / Template kann eigene Standard-Attribute besitzen.
-     */
-    private $stdAttr = [
-        'std' => ['label', 'value', 'id', 'name', 'placeholder', 'attribute', 'required', 'maxlength', 'size', 'class', 'title', 'id', 'readonly', 'disabled', 'autocomplete', 'autofocus', 'form', 'width', 'height', 'list', 'pattern', 'step'],
-        'number' => ['min', 'max'],
-        'select' => ['size' => 1, 'active', 'multiple'],
-        'radio' => ['active', 'multiple'],
-        'checkbox' => ['active', 'multiple' => 1],
-        'textarea' => ['cols' => 50, 'rows' => 10],
-        'submit' => ['formaction', 'formenctype', 'formmethod', 'formnovalidate', 'formtarget'],
-    ];
 
     public $attributes = [];
 
@@ -34,10 +20,14 @@ class Field
 
         $this->fieldId = $fieldId;
         $this->assign($FieldConfig);
-        $this->std()->format();
+
         if ($this->type === 'default') {
             $this->type = 'text';
         }
+
+        $oAttributes = new Attributes;
+        $oAttributes->fetchField($this);
+
         $this->template = $this->type;
 
         $this->field = $this;
@@ -48,13 +38,13 @@ class Field
             $this->attributes[] = 'onchange="this.form.submit();"';
         }
 
-        $this->form = $this->form->settings;
-        unset($this->stdAttr);
+        $this->form = $this->form->getSettings();
     }
 
     protected function updateValue()
     {
-        if (empty($_POST)) {
+        $settings = $this->form->getSettings();
+        if (empty($_POST) && empty($settings['updateValues'])) {
             return;
         }
 
@@ -66,9 +56,25 @@ class Field
         $this->value = $postValue;
     }
 
-    public function getAttributes()
+    public function getAttributes($ignore = [])
     {
-        return implode(' ', $this->attributes);
+        $oAttributes = new Attributes();
+        $Attributes = $this->attributes;
+        foreach (Attributes::getAttributes() as $type => $attrs) {
+            if ($type == 'std' || $type == $this->template) {
+                foreach ($attrs as $key => $attr) {
+                    if (!in_array($attr, array_merge(['id', 'label', 'form'], $ignore)) && !empty($this->{$attr})) {
+                        // $Attributes[] = $attr . '="' . $this->{$attr} . '"';
+                        $strAttribute = $oAttributes->render($attr, $this->{$attr});
+                        if (!empty($strAttribute)) {
+                            $Attributes[] = $strAttribute;
+                        }
+                    }
+                }
+            }
+        }
+
+        return implode(' ', $Attributes);
     }
 
     protected function assign($data)
@@ -93,55 +99,5 @@ class Field
         }
 
         return $Data;
-    }
-
-    private function std()
-    {
-        foreach ($this->stdAttr as $type => $attrs) {
-            if ($type == 'std' || $type == $this->template) {
-                foreach ($attrs as $key => $attr) {
-                    $this->stdValue($key, $attr);
-                }
-            }
-        }
-
-        if (!empty($_POST[$this->name]) && $this->postvalue) {
-            if (!$this->value && !in_array($this->template, $this->protectedValues)) {
-                $this->value = $_POST[$this->name];
-            } elseif ($this->value == $_POST[$this->name]) {
-                $this->active = $this->value;
-            } elseif ($this->template !== 'hidden' && ($this->multiple || $this->template === 'select')) {
-                $this->active = $_POST[$this->name];
-            }
-
-        }
-        return $this;
-    }
-
-    /**
-     * @brief Setzt Standard-Werte für Standard-Attribute zur verfügung.
-     */
-    private function stdValue($key, $attr = "")
-    {
-        if (!is_numeric($key) && empty($this->$key)) {
-            $this->$key = $attr;
-        } elseif (is_numeric($key) && empty($this->$attr)) {
-            $this->$attr = "";
-        }
-    }
-
-    /**
-     * @brief Formatiert Attribute damit diese auch ohne Angaben valide ausgegeben werden können.
-     */
-    private function format($arr = [])
-    {
-        if (empty($this->id)) {
-            $this->id = $this->type . '_' . $this->fieldId;
-            $arrID = explode('_', $this->id);
-            $id = end($arrID);
-            /* checkbox_checkbox / checkbox_checkbox_1 / checkbox_checkbox_2 / ... */
-            $this->id = (is_numeric($id) ? str_replace('_' . $id, '_' . ($id + 1), $this->id) : $this->id . '_1');
-        }
-        return $this;
     }
 }
