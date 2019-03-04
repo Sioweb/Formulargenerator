@@ -4,8 +4,8 @@ namespace Sioweb\Lib\Formgenerator\Core;
 
 class Fieldset
 {
-    
     public $template = 'fieldset';
+    public $label = false;
 
     public function __construct($Name, Array $Fieldset)
     {

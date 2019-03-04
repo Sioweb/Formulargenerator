@@ -7,7 +7,7 @@ use Sioweb\Lib\Formgenerator\Core\Form;
 class Field
 {
 
-    private $Form = null;
+    private $form = null;
 
     public $field = null;
 
@@ -28,35 +28,38 @@ class Field
 
     public $attributes = [];
 
-    public function __construct($fieldId, Array $FieldConfig, Form $Form)
+    public function __construct($fieldId, array $FieldConfig, Form $form)
     {
-        $this->Form = $Form;
+        $this->form = $form;
 
         $this->fieldId = $fieldId;
         $this->assign($FieldConfig);
         $this->std()->format();
+        if ($this->type === 'default') {
+            $this->type = 'text';
+        }
         $this->template = $this->type;
 
         $this->field = $this;
 
         $this->updateValue();
 
-        if(!empty($this->submitOnChange)) {
+        if (!empty($this->submitOnChange)) {
             $this->attributes[] = 'onchange="this.form.submit();"';
         }
 
-        unset($this->Form);
+        $this->form = $this->form->settings;
+        unset($this->stdAttr);
     }
 
     protected function updateValue()
     {
-        if(empty($_POST)) {
+        if (empty($_POST)) {
             return;
         }
-        
-        $postValue = $this->Form->getFieldValues();
-        
-        foreach($this->names as $key) {
+
+        $postValue = $this->form->getFieldValues();
+        foreach ($this->names as $key) {
             $postValue = $postValue[$key];
         }
 
@@ -70,23 +73,23 @@ class Field
 
     protected function assign($data)
     {
-        foreach($data as $key => $value) {
+        foreach ($data as $key => $value) {
             $this->{$key} = $this->replaceVariables($value);
         }
     }
 
     protected function replaceVariables($Data)
     {
-        if(is_array($Data)) {
-            foreach($Data as $key => $value) {
-                if(is_array($value)) {
+        if (is_array($Data)) {
+            foreach ($Data as $key => $value) {
+                if (is_array($value)) {
                     $Data[$key] = $this->replaceVariables($value);
                 } else {
-                    $Data[$key] = $this->Form->replaceVariables($value);
+                    $Data[$key] = $this->form->replaceVariables($value);
                 }
             }
         } else {
-            $Data = $this->Form->replaceVariables($Data);
+            $Data = $this->form->replaceVariables($Data);
         }
 
         return $Data;
@@ -140,5 +143,5 @@ class Field
             $this->id = (is_numeric($id) ? str_replace('_' . $id, '_' . ($id + 1), $this->id) : $this->id . '_1');
         }
         return $this;
-	}
+    }
 }
