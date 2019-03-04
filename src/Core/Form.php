@@ -70,6 +70,9 @@ class Form
             $formdata = $this->dataContainer->loadData();
         }
         $this->settings = array_merge($this->settings, array_diff_key($formdata['form'], ['palettes' => '', 'fields' => '']));
+        if(empty($this->settings['id'])) {
+            $this->settings['id'] = md5(uniqid(microtime()));
+        }
         $this->prepareFormData($formdata);
     }
 
@@ -79,6 +82,7 @@ class Form
             return $String;
         }
         
+        $Data = array_merge($this->settings, $Data);
         $brackets = $this->settings['brackets'];
         array_walk($brackets, function(&$item) use ($brackets) {
             $item = addcslashes($item, implode('', (array)$brackets));
@@ -89,7 +93,9 @@ class Form
         }
 
         foreach ($Data as $Variable => $Replacement) {
-            $String = preg_replace('|' . $brackets[0] . '[ ]+\${1}' . strtoupper($Variable) . '[ ]+' . $brackets[1] . '|i', $Replacement, $String);
+            if(preg_match('|' . $brackets[0] . '[ ]+\${1}' . strtoupper($Variable) . '[ ]+' . $brackets[1] . '|i', $String)) {
+                $String = preg_replace('|' . $brackets[0] . '[ ]+\${1}' . strtoupper($Variable) . '[ ]+' . $brackets[1] . '|i', $Replacement, $String);
+            }
         }
 
         return $String;
@@ -123,7 +129,11 @@ class Form
                 preg_match_all('#([a-z]+)|\[([^\]]+)\]#', $field['name'], $matches);
                 $field['names'] = array_merge(array_filter($matches[1]), array_filter($matches[2]));
 
-                $Classname = $FieldsNamespace . ucfirst($field['type']);
+                if($field['type'] === 'default') {
+                    $Classname = $FieldsNamespace . 'Text';
+                } else {
+                    $Classname = $FieldsNamespace . ucfirst($field['type']);
+                }
                 $field = new $Classname($fieldId, $field, $this);
                 if(!empty($field->palette)) {
                     $this->triggerPalette = $field;
@@ -198,10 +208,10 @@ class Form
         if (!empty($this->triggerPalette->value)) {
             $Palette = $this->triggerPalette->value;
         }
-
         $Palette = $this->palettes[$Palette];
         foreach ($Palette->getFieldsets() as $fieldsetId => $fieldset) {
             foreach ($fieldset->getFields() as $fieldName) {
+                $this->field = null;
                 $this->field = $this->fields[$fieldName];
                 $this->output[$fieldsetId][] = $this->field->raw = $this->loadTemplate($this->field->type, $this->field);
                 $fieldset->updateField($this->field);
