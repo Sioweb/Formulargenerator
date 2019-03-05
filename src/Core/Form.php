@@ -38,7 +38,13 @@ class Form
 
     public function __construct($TemplateLoader = null, $DataContainer = null)
     {
-        $this->TemplateLoader = $TemplateLoader;
+        if (!empty($TemplateLoader)) {
+            if ($TemplateLoader instanceof TemplateInterface) {
+                $this->TemplateLoader = $TemplateLoader;
+            } else {
+                // throw execption
+            }
+        }
         if (!empty($DataContainer)) {
             if ($DataContainer instanceof FormInterface) {
                 $this->dataContainer = $DataContainer;
