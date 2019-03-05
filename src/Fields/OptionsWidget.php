@@ -8,7 +8,12 @@ class OptionsWidget extends Field
 {
     public function __construct($fieldId, array $FieldConfig, Form $form)
     {
-        // die('<pre>' . print_r($FieldConfig, true));
         parent::__construct($fieldId, $FieldConfig, $form);
+        
+        if(empty($this->value)) {
+            $this->value = [
+                ['key'=>'', 'value'=>'']
+            ];
+        }
     }
 }
