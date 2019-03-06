@@ -59,7 +59,7 @@ class Attributes
 
     public function render($Attribute, $Value)
     {
-        if (!in_array($Attribute, ['require', 'selected', 'checked'])) {
+        if (!in_array($Attribute, ['require', 'selected', 'checked', 'readonly', 'disable'])) {
             return $Attribute . '="' . $Value . '"';
         }
 

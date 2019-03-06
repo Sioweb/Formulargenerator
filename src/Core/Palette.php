@@ -2,6 +2,8 @@
 
 namespace Sioweb\Lib\Formgenerator\Core;
 
+use Sioweb\Lib\Formgenerator\Fields\Fieldset;
+
 class Palette
 {
     private $palette = [];

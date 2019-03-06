@@ -11,7 +11,6 @@ class Form
     private $fields = null;
     private $field = null;
     private $ext = 'php';
-    private $legend = [];
     private $fieldset = 'std';
     private $triggerPalette = null;
 
@@ -30,10 +29,6 @@ class Form
         'defaultPalette' => 'default',
     ];
 
-    private $postvalue = true;
-
-    private $protectedValues = ['select', 'hidden'];
-    private $output = [];
     private $TemplateLoader = null;
 
     public function __construct($TemplateLoader = null, $DataContainer = null)
@@ -82,6 +77,9 @@ class Form
     {
         if (empty($formdata) && !empty($this->dataContainer)) {
             $formdata = $this->dataContainer->loadData();
+            if($this->dataContainer instanceof SubpaletteInterface) {
+                $formdata['form']['subpalettes'] = $this->dataContainer->loadSubpalettes();
+            }
         }
         $this->settings = array_merge($this->settings, array_diff_key($formdata['form'], ['palettes' => '', 'fields' => '']));
         if (empty($this->settings['id'])) {
@@ -131,6 +129,12 @@ class Form
             $palette = new Palette($palette);
         }
 
+        if(!empty($formdata['form']['subpalettes'])) {
+            foreach ($formdata['form']['subpalettes'] as $name => &$subpalette) {
+                $subpalette = new Subpalette($name, $subpalette);
+            }
+        }
+
         $FieldsNamespace = '\\Sioweb\\Lib\\Formgenerator\\Fields\\';
         if (!empty($this->settings['fieldnamespace'])) {
             $FieldsNamespace = $this->settings['fieldnamespace'];
@@ -163,17 +167,24 @@ class Form
             }
         }
         $this->palettes = $formdata['form']['palettes'];
+        if(!empty($formdata['form']['subpalettes'])) {
+            $this->subpalettes = $formdata['form']['subpalettes'];
+        }
         $this->fields = $formdata['form']['fields'];
     }
 
     public function __set($var, $val)
     {
-        $var = strtolower($var);
-        $this->setup($this->field);
-        if (empty($this->field->$var) || $var !== 'name') {
-            $this->field->$var = $val;
+        if(!in_array($var, ['palettes', 'subpalettes'])) {
+            $var = strtolower($var);
+            $this->setup($this->field);
+            if (empty($this->field->$var) || $var !== 'name') {
+                $this->field->$var = $val;
+            } else {
+                trigger_error('Der Name für das Feld "' . $this->field->$var . '" wurde bereits gewählt und kann nicht geändert werden!', E_USER_NOTICE);
+            }
         } else {
-            trigger_error('Der Name für das Feld "' . $this->field->$var . '" wurde bereits gewählt und kann nicht geändert werden!', E_USER_NOTICE);
+            $this->$var = $val;
         }
     }
 
@@ -234,7 +245,21 @@ class Form
             }
         }
 
-        $Palette = $this->palettes[$Palette];
+        $Output = $this->walkPalette($this->palettes[$Palette]);
+
+        $this->field = null;
+        $this->fields = null;
+
+        if ($shout) {
+            echo implode(($shout === true ? '' : $shout), $Output);
+        }
+
+        return $Output;
+    }
+
+    protected function walkPalette($Palette, $Subpalette = false)
+    {
+        $Output = [];
         $PaletteFieldsets = $Palette->getFieldsets();
 
         foreach ($PaletteFieldsets as $fieldsetId => $fieldset) {
@@ -248,24 +273,36 @@ class Form
                 if (empty($this->fields[$fieldName]) || !empty($this->fields[$fieldName]->hideOnEdit)) {
                     continue;
                 }
-                $this->field = null;
+
                 $this->field = $this->fields[$fieldName];
-                $this->output[$fieldsetId][] = $this->field->raw = $this->loadTemplate($this->field->type, $this->field);
+                if(!empty($this->subpalettes[$fieldName])) {
+                    $this->field->attributes[] = 'data-subpalette="' . $fieldName . '"';
+                }
+                $Output[$fieldsetId][] = $this->field->raw = $this->loadTemplate($this->field->type, $this->field);
+                
                 $fieldset->updateField($this->field);
+                
+                if(!empty($this->subpalettes[$fieldName])) {
+                    $_field = $this->field;
+                    $Output[$fieldsetId] = array_merge($Output[$fieldsetId], $this->walkPalette($this->subpalettes[$fieldName], $fieldset));
+                    $this->field = $_field;
+                    unset($_field);
+                }
                 $skipFieldset = false;
             }
-            if (!$skipFieldset) {
-                $this->output[$fieldsetId] = $this->field->raw = $this->loadTemplate('fieldset', $fieldset);
+            if (!$skipFieldset && !$Subpalette) {
+                $Output[$fieldsetId] = $this->field->raw = $this->loadTemplate('fieldset', $fieldset);
+            } elseif (!$skipFieldset && $Subpalette) {
+                $Output[$fieldsetId] = $this->field->raw = $this->loadTemplate('subpalette', $fieldset);
+                $Subpalette->updateField($this->field);
             }
         }
-        $this->field = null;
-        $this->fields = null;
 
-        if ($shout) {
-            echo implode(($shout === true ? '' : $shout), $this->output);
+        if($Subpalette) {
+            return $Output['subpalette'];
         }
 
-        return $this->output;
+        return $Output;
     }
 
     private function loadTemplate($tpl, $Data = [])
