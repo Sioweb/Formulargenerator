@@ -5,7 +5,7 @@ namespace Sioweb\Lib\Formgenerator\Fields;
 use Sioweb\Lib\Formgenerator\Attributes\Attributes;
 use Sioweb\Lib\Formgenerator\Core\Form;
 
-class Field
+class Field implements FieldInterface
 {
 
     public $form = null;
