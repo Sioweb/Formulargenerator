@@ -137,6 +137,11 @@ class Form
         }
         foreach ($formdata['form']['fields'] as $fieldId => &$field) {
             if (is_array($field)) {
+
+                if(empty($field['type'])) {
+                    continue;
+                }
+                
                 if (empty($field['name'])) {
                     $field['name'] = $this->replaceVariables($this->settings['fieldname'], ['fieldname' => $fieldId]);
                 }
