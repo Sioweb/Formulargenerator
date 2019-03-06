@@ -41,6 +41,11 @@ class Field
         $this->form = $this->form->getSettings();
     }
 
+    public function getValue()
+    {
+        return $this->value;
+    }
+
     protected function updateValue()
     {
         $settings = $this->form->getSettings();

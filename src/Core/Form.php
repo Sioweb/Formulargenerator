@@ -223,7 +223,10 @@ class Form
     {
         $Palette = $this->settings['defaultPalette'];
         if (!empty($this->triggerPalette->value)) {
-            $Palette = $this->triggerPalette->value;
+            $_Palette = $this->triggerPalette->getValue();
+            if($_Palette !== false && $_Palette !== '_blank') {
+                $Palette = $_Palette;
+            }
         }
 
         $Palette = $this->palettes[$Palette];
