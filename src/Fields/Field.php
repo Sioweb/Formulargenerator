@@ -105,4 +105,24 @@ class Field implements FieldInterface
 
         return $Data;
     }
+
+    public function hasSubpalettes($FormSubpalettes) {
+        $FieldNames = [];
+
+        switch($this->type) {
+            case 'select':
+                foreach($this->value as $option) {
+                    if(!empty($FormSubpalettes[$this->fieldId . '_' . $option['key']])) {
+                        $FieldNames[] = $this->fieldId . '_' . $option['key'];
+                    }
+                }
+            default:
+                if(!empty($FormSubpalettes[$this->fieldId])) {
+                    $FieldNames[] = $this->fieldId;
+                }
+            break;
+        }
+
+        return $FieldNames;
+    }
 }

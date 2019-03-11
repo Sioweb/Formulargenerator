@@ -260,6 +260,9 @@ class Form
     protected function walkPalette($Palette, $Subpalette = false)
     {
         $Output = [];
+        if($Palette === null) {
+            return $Output;
+        }
         $PaletteFieldsets = $Palette->getFieldsets();
 
         foreach ($PaletteFieldsets as $fieldsetId => $fieldset) {
@@ -275,18 +278,22 @@ class Form
                 }
 
                 $this->field = $this->fields[$fieldName];
-                if(!empty($this->subpalettes[$fieldName])) {
+                if($this->field->hasSubpalettes($this->subpalettes)) {
                     $this->field->attributes[] = 'data-subpalette="' . $fieldName . '"';
                 }
                 $Output[$fieldsetId][] = $this->field->raw = $this->loadTemplate($this->field->type, $this->field);
                 
                 $fieldset->updateField($this->field);
                 
-                if(!empty($this->subpalettes[$fieldName])) {
-                    $_field = $this->field;
-                    $Output[$fieldsetId] = array_merge($Output[$fieldsetId], $this->walkPalette($this->subpalettes[$fieldName], $fieldset));
-                    $this->field = $_field;
-                    unset($_field);
+                if($fieldNames = $this->field->hasSubpalettes($this->subpalettes)) {
+                    foreach($fieldNames as $fieldName) {
+                        // if(!empty($this->subpalettes[$fieldName])) {
+                            $_field = $this->field;
+                            $Output[$fieldsetId] = array_merge($Output[$fieldsetId], $this->walkPalette($this->subpalettes[$fieldName], $fieldset));
+                            $this->field = $_field;
+                            unset($_field);
+                        // }
+                    }
                 }
                 $skipFieldset = false;
             }
