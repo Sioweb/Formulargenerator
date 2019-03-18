@@ -49,6 +49,15 @@ class Form
         }
     }
 
+    public function ignorePostData($updateValues = null)
+    {
+        if(is_array($updateValues)) {
+            $this->settings['updateValues'] = array_flip($updateValues);
+        } else {
+            $this->settings['updateValues'] = $updateValues;
+        }
+    }
+
     public function setTemplatePath($path)
     {
         $this->path = $path;
@@ -61,8 +70,12 @@ class Form
 
     public function getFieldValues()
     {
-        if (!empty($_POST)) {
-            return array_replace_recursive($_POST, $this->fieldValues);
+        if ($this->settings['updateValues'] && !empty($_POST)) {
+            if(is_array($this->settings['updateValues'])) {
+                return array_replace_recursive(array_intersect_key($_POST, $this->settings['updateValues']), $this->fieldValues);
+            } else {
+                return array_replace_recursive($_POST, $this->fieldValues);
+            }
         }
 
         return $this->fieldValues;
@@ -141,7 +154,6 @@ class Form
         }
         foreach ($formdata['form']['fields'] as $fieldId => &$field) {
             if (is_array($field)) {
-
                 if(empty($field['type'])) {
                     continue;
                 }
@@ -158,7 +170,7 @@ class Form
                 } else {
                     $Classname = $FieldsNamespace . ucfirst($field['type']);
                 }
-
+                
                 $field = new $Classname($fieldId, $field, $this);
 
                 if (!empty($field->palette)) {

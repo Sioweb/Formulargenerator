@@ -25,6 +25,7 @@ class Options
         }
         $FirstOption = current($this->field->options);
 
+
         if (!is_array($FirstOption)) {
             foreach ($this->field->options as $key => $option) {
                 $this->field->options[$key] = [
@@ -36,13 +37,20 @@ class Options
                     $this->field->options[$key]['active'] = 1;
                 }
             }
-        } else {
+        } elseif(is_array($this->field->{$Column})) {
             foreach ($this->field->options as $key => $option) {
                 if (!empty($this->field->{$Column}) && in_array($option['key'], $this->field->{$Column})) {
                     $this->field->options[$key]['active'] = 1;
                 }
             }
+        } elseif (is_array($FirstOption)) {
+            foreach ($this->field->options as $key => $option) {
+                if ($this->field->{$Column} == $option['key']) {
+                    $this->field->options[$key]['active'] = 1;
+                }
+            }
         }
+
         if (!empty($this->field->blank)) {
             array_unshift($this->field->options, [
                 'key' => '_blank',
