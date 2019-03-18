@@ -36,6 +36,12 @@ class Options
                     $this->field->options[$key]['active'] = 1;
                 }
             }
+        } else {
+            foreach ($this->field->options as $key => $option) {
+                if (!empty($this->field->{$Column}) && in_array($option['key'], $this->field->{$Column})) {
+                    $this->field->options[$key]['active'] = 1;
+                }
+            }
         }
         if (!empty($this->field->blank)) {
             array_unshift($this->field->options, [
