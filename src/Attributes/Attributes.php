@@ -54,6 +54,8 @@ class Attributes
             $id = end($arrID);
             /* checkbox_checkbox / checkbox_checkbox_1 / checkbox_checkbox_2 / ... */
             $Field->id = (is_numeric($id) ? str_replace('_' . $id, '_' . ($id + 1), $Field->id) : $Field->id . '_1');
+        } else {
+            $Field->forceId = true;
         }
     }
 
