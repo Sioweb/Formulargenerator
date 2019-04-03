@@ -17,6 +17,9 @@ class Select extends Field
         if(!empty($FieldOptions)) {
             $this->value = $FieldOptions;
         }
+        if(!empty($this->multiple) && !preg_match('|\[[0-9]*\]|is', $this->name)) {
+            $this->name .= '[]';
+        }
     }
 
     public function setValue($value)
