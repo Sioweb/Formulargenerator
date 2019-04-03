@@ -13,7 +13,23 @@ class Select extends Field
     {
         parent::__construct($fieldId, $FieldConfig, $Form);
         $Options = new Options($this);
-        $this->value = $Options->getValue();
+        $FieldOptions = $Options->getValue();
+        if(!empty($FieldOptions)) {
+            $this->value = $FieldOptions;
+        }
+    }
+
+    public function setValue($value)
+    {
+        if (is_array($this->value)) {
+            foreach ($this->value as &$option) {
+                if ($option['key'] == $value) {
+                    $option['active'] = 1;
+                }
+            }
+        } else {
+            $this->value = $value;
+        }
     }
 
     public function getValue()

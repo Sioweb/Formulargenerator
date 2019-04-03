@@ -2,6 +2,8 @@
 
 namespace Sioweb\Lib\Formgenerator\Fields;
 
+use Sioweb\Lib\Formgenerator\Attributes\Attributes;
+
 class Fieldset
 {
     public $template = 'fieldset';
@@ -10,6 +12,7 @@ class Fieldset
     public function __construct($Name, Array $Fieldset)
     {
         $this->id = $Name;
+        $this->fieldset = $this;
         $this->assign($Fieldset);
         $this->fields = array_flip($this->fields);
     }
@@ -29,5 +32,26 @@ class Fieldset
     public function getFields()
     {
         return array_flip($this->fields);
+    }
+
+    public function getAttributes($ignore = [])
+    {
+        $oAttributes = new Attributes();
+        $Attributes = $this->attributes;
+        foreach (Attributes::getAttributes() as $type => $attrs) {
+            if ($type == 'std' || $type == $this->template) {
+                foreach ($attrs as $key => $attr) {
+                    if (!in_array($attr, array_merge(['id', 'label', 'form'], $ignore)) && !empty($this->{$attr})) {
+                        // $Attributes[] = $attr . '="' . $this->{$attr} . '"';
+                        $strAttribute = $oAttributes->render($attr, $this->{$attr});
+                        if (!empty($strAttribute)) {
+                            $Attributes[] = $strAttribute;
+                        }
+                    }
+                }
+            }
+        }
+
+        return implode(' ', $Attributes);
     }
 }

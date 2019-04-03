@@ -41,6 +41,11 @@ class Field implements FieldInterface
         $this->form = $this->form->getSettings();
     }
 
+    public function setValue($value)
+    {
+        $this->value = $value;
+    }
+
     public function getValue()
     {
         return $this->value;

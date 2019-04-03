@@ -15,8 +15,14 @@ class Options
 
     public function getValue()
     {
-        if (empty($this->field->options)) {
+        if (empty($this->field->options) && empty($this->field->options_callback)) {
             return [];
+        }
+
+        if(!empty($this->field->options_callback)) {
+            $Classname = '\\'.$this->field->options_callback[0];
+            $ClassInstance = new $Classname();
+            $this->field->options = $ClassInstance->{$this->field->options_callback[1]}();
         }
 
         $Column = 'value';
@@ -57,7 +63,7 @@ class Options
                 'value' => '_blank',
             ]);
         }
-
+        
         return $this->field->options;
     }
 }

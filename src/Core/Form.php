@@ -148,11 +148,25 @@ class Form
             }
         }
 
+        $this->prepareFields($formdata['form']['fields']);
+
+        $this->palettes = $formdata['form']['palettes'];
+        if(!empty($formdata['form']['subpalettes'])) {
+            $this->subpalettes = $formdata['form']['subpalettes'];
+        }
+    }
+
+    protected function prepareFields(&$FieldData) {
+
+        if(!empty($this->fields)) {
+            return $this->fields;
+        }
+
         $FieldsNamespace = '\\Sioweb\\Lib\\Formgenerator\\Fields\\';
         if (!empty($this->settings['fieldnamespace'])) {
             $FieldsNamespace = $this->settings['fieldnamespace'];
         }
-        foreach ($formdata['form']['fields'] as $fieldId => &$field) {
+        foreach ($FieldData as $fieldId => &$field) {
             if (is_array($field)) {
                 if(empty($field['type'])) {
                     continue;
@@ -160,6 +174,8 @@ class Form
                 
                 if (empty($field['name'])) {
                     $field['name'] = $this->replaceVariables($this->settings['fieldname'], ['fieldname' => $fieldId]);
+                } else {
+                    $field['name'] = $this->replaceVariables($field['name'], ['fieldname' => $fieldId]);
                 }
 
                 preg_match_all('#([a-z]+)|\[([^\]]+)\]#', $field['name'], $matches);
@@ -178,11 +194,8 @@ class Form
                 }
             }
         }
-        $this->palettes = $formdata['form']['palettes'];
-        if(!empty($formdata['form']['subpalettes'])) {
-            $this->subpalettes = $formdata['form']['subpalettes'];
-        }
-        $this->fields = $formdata['form']['fields'];
+
+        $this->fields = $FieldData;
     }
 
     public function __set($var, $val)
@@ -269,6 +282,14 @@ class Form
         return $Output;
     }
 
+    public function getFields()
+    {
+        if(empty($this->fields) && !empty($this->dataContainer) && $this->dataContainer instanceof FormInterface) {
+            $this->prepareFields($this->dataContainer->loadFieldConfig());
+        }
+        return $this->fields;
+    }
+
     protected function walkPalette($Palette, $Subpalette = false)
     {
         $Output = [];
@@ -290,6 +311,7 @@ class Form
                 }
 
                 $this->field = $this->fields[$fieldName];
+                
                 if($this->field->hasSubpalettes($this->subpalettes)) {
                     $this->field->attributes[] = 'data-subpalette="' . $fieldName . '"';
                 }

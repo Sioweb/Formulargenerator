@@ -16,6 +16,19 @@ class Radio extends Field
         $this->value = $Options->getValue();
     }
 
+    public function setValue($value)
+    {
+        if (is_array($this->value)) {
+            foreach ($this->value as &$option) {
+                if ($option['key'] == $value) {
+                    $option['active'] = 1;
+                }
+            }
+        } else {
+            $this->value = $value;
+        }
+    }
+
     public function getValue()
     {
         if (is_array($this->value)) {
