@@ -15,10 +15,18 @@
     ],
     "homepage": "https://github.com/sioweb/Formulargenerator",
     "license": "GPL-3.0-only",
-    "require": {},
+    "require": {
+        "sioweb/ccevent-git": "*"
+    },
     "autoload": {
         "psr-4": {
             "Sioweb\\Lib\\Formgenerator\\": "./src/"
         }
+    },
+    "scripts": {
+        "package-scripts": [
+            "@config.localhost==1",
+            "Sioweb\\CCEvent\\Git\\Composer\\Git::init --repository=https://github.com/Sioweb/Formulargenerator"
+        ]
     }
 }
